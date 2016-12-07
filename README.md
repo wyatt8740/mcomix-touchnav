@@ -15,7 +15,9 @@ touchscreen tablet that I can boot a regular GNU/Linux distro off of, you can
 bet I'll make this work on it via XCB or Xlib.~~
 
 
-I still don't have a touchscreen tablet, but I just ported it anyway.
+I still don't have a touchscreen tablet, but I just ported it anyway:
+
+![Screenshot of linux version](/screenshot.png?raw=true)
 
 The linux version uses the `xcffib` module (XCB bindings) where it has to deal
 with the X server. It's also been cleaned up a bit (though it's still pretty
