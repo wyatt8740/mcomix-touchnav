@@ -185,6 +185,8 @@ if(no_wm == True):
     Button(buttonframe2,text="↗",height=1,width=1,justify=LEFT,font=(None,8),command=topright).grid(row=0,column=4)
     Button(buttonframe2,text="↙",height=1,width=1,justify=LEFT,font=(None,8),command=btmleft).grid(row=1,column=3)
     Button(buttonframe2,text="↘",height=1,width=1,justify=LEFT,font=(None,8),command=btmright).grid(row=1,column=4)
+#    Button(buttonframe2,text="X",height=3,width=1,justify=LEFT,font=(None,8),command=btmright).grid(row=0,column=5,rowspan=2)
+    Button(buttonframe2,text="❌",height=3,width=1,justify=LEFT,font=(None,8),command=root.destroy).grid(row=0,column=5,rowspan=2)
 # }
 
 Button(buttonframe2,text="Select",height=1,width=3,justify=LEFT,font=(None,8),command=winget).grid(row=0,column=2)
