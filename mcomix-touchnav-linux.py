@@ -3,7 +3,7 @@
 from time import sleep
 import thread
 
-# python libxcb bindings:
+# python libxcb bindings (xcffib):
 import xcffib
 import xcffib.xproto
 import xcffib.xtest
@@ -138,9 +138,6 @@ def btmleft():
 def btmright():
     root.geometry('-0-0')
 
-# connection is disconnected when the TK window closes.
-
-
 global xtest
 xtest=connection(xcffib.xtest.key)
 global inputWindow
@@ -153,8 +150,10 @@ root=Tk()  #holder
 root.resizable(width=FALSE, height=FALSE)
 root.resizable(0,0)
 root.attributes('-fullscreen', True)
+
 if(no_wm == True):
 # {
+    # do not let the window manager take control of the window.
     root.overrideredirect(True)
     # root.overrideredirect(no_wm)
 # }
@@ -194,7 +193,11 @@ Button(buttonframe1,text="<-------",height=3,width=3,justify=LEFT,font=(None,8),
 Button(buttonframe1,text="------->",height=3,width=3,justify=LEFT,font=(None,8),command=right).grid(row=0,column=1)
 
 def on_close():
+    # connection is disconnected when the TK window closes.
+    # the program (and thus connection) can also be aborted via ctrl+\ (SIGQUIT)
+    # in a terminal.
     connection.disconnect()
     root.destroy()
 
 root.mainloop()           #important for closing the root=Tk()
+
