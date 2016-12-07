@@ -13,13 +13,9 @@ or 11th grade.
 
 
 ~~It is currently windows-only, because I was never able to get a GNU/Linux
-
 distro working on a Clover Trail SOC, unfortunately, and I did it on a school
-
 tablet that I no longer posess that ran Windows 8. If I ever get a cheap
-
 touchscreen tablet that I can boot a regular GNU/Linux distro off of, you can
-
 bet I'll make this work on it via XCB or Xlib.~~
 
 
