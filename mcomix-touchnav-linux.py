@@ -46,6 +46,8 @@ full_screen=0
 global connection
 connection = xcffib.connect()
 
+global window_selected
+window_selected=False
 
 def winget():
     global delay_ms
@@ -53,10 +55,12 @@ def winget():
 
 def getwindow():
     global inputWindow
+    global window_selected
     connection.flush()
     windowCookie = connection.core.GetInputFocus().reply()
     # 'focus' is the window's ID.
     inputWindow = windowCookie.focus
+    window_selected=True
     print inputWindow
 
 def pressKey(keyCode):
@@ -74,14 +78,22 @@ def pressKey(keyCode):
 
 def left():
     global shell
-    # set focused window
-    xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
-    typeleft()
+    global window_selected
+    if(window_selected==True):
+        # set focused window
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typeleft()
+    else:
+        print "No window has been selected! Select a window and then try again."
 
 def right():
     global shell
-    xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
-    typeright()
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typeright()
+    else:
+        print "No window has been selected! Select a window and then try again."
 
 def killPanel():
 # hax again
@@ -94,24 +106,26 @@ def fullscreen():
     global full_screen
     global root
     global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        if(full_screen == 0):
+            # {
+            killPanel()
+            full_screen=1
+            root.wm_attributes("-fullscreen", 1)
+            # }
 
-    xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
-    if(full_screen == 0):
-        # {
-        killPanel()
-        full_screen=1
-        root.wm_attributes("-fullscreen", 1)
-        # }
-
+        else:
+            if(hax == 1):
+            # {
+                os.system("mate-panel --replace 2>&1 1>/dev/null &")
+            # }
+            root.wm_attributes("-fullscreen",0)
+            full_screen=0
+        typef()
     else:
-        if(hax == 1):
-        # {
-            os.system("mate-panel --replace 2>&1 1>/dev/null &")
-        # }
-        root.wm_attributes("-fullscreen",0)
-        full_screen=0
-    typef()
-
+        print "No window has been selected! Select a window and then try again."
 
 
 def typeleft():
@@ -149,12 +163,12 @@ root=Tk()  #holder
 
 root.resizable(width=FALSE, height=FALSE)
 root.resizable(0,0)
-root.attributes('-fullscreen', True)
 
 if(no_wm == True):
 # {
     # do not let the window manager take control of the window.
     root.overrideredirect(True)
+    root.attributes('-fullscreen', True)
     # root.overrideredirect(no_wm)
 # }
 
