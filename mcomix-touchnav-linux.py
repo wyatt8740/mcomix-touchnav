@@ -8,6 +8,8 @@ import xcffib
 import xcffib.xproto
 import xcffib.xtest
 
+import os
+import sys
 #================<CONFIG>================#
 
 # no_wm :
@@ -15,39 +17,90 @@ import xcffib.xtest
 #   when set to False, program is draggable via your window manager.
 #   default is True.
 global no_wm
-no_wm=True
+# no_wm=True
+no_wm=False
+
+# extended_controls:
+#   when true, extended functionality buttons are present
+global extended_controls
+extended_controls=True
+
+
+# corner_controls :
+#   when set to True, the corner controls (always visible when no_wm is set) are visible, regardless
+#   of if the WM is managing the window.
+global corner_controls
+corner_controls=True
 
 # hax :
-#   when set to 1, program kills the program 'mate-panel' and relauunches it when entering and exiting fullscreen
-#   to stop it from sitting above the fullscreen window. 'mate-panel' is hardcoded, like most of the rest of this
-#   program. Sorry. I'm just amazed this program  works at all, honestly. It's based on one of the earliest programs
-#   I wrote that I still have source code for! It works more like assembly language or Commodore BASIC than Python...
+#   when set to 1, program kills the program 'mate-panel' and relauunches it when entering and exiting
+#   fullscreen to stop it from sitting above the fullscreen window. 'mate-panel' is hardcoded, like most
+#   of the rest of this program. Sorry. I'm just amazed this program  works at all, honestly. It's based
+#   on one of the earliest programs I wrote that I still have source code for! It works more like
+#   assembly language or Commodore BASIC than Python...
 global hax
 hax=0
 
 # delay_ms :
-#   window selection delay, in milliseconds. After hitting the 'select' button you have this many milliseconds to
-#   set input focus to the window you want to control. Default is 3000 (3 seconds.)
+#   window selection delay, in milliseconds. After hitting the 'select' button you have this many
+#   milliseconds to set input focus to the window you want to control. Default is 3000 (3 seconds.)
 global delay_ms
 delay_ms=3000
 
 #================</CONFIG>===============#
 
-if(hax==1):
-    import os # only needed for an ugly hack to kill mate-panel when entering
+# if(hax==1):
+#    import os # only needed for an ugly hack to kill mate-panel when entering
               # fullscreen.
 
-# this is not part of config. It is an easy way for the program to retain an idea of when it is in fullscreen and
-# not.
+# this is not part of config. It is an easy way for the program to retain an idea of when it is in
+# fullscreen and not. Lazy, though.
 global full_screen
 full_screen=0
+
+global portrait
+portrait=False
 
 # connection might be used anywhere (of course).
 global connection
 connection = xcffib.connect()
 
 global window_selected
-window_selected=False
+global inputWindow
+
+# allow passing window ID as argument to script. This allows for reloading the
+# 'widget' without having to re-select the window to control each time.
+if (len(sys.argv) == 3 ) :
+    if (sys.argv[1]=="-win") :
+        window_selected=True
+        inputWindow=int(sys.argv[2])
+    if (sys.argv[1]=="-rot") :
+        if (sys.argv[2]=="portrait") :
+            portrait=True
+        else :
+            portrait=False
+
+elif (len(sys.argv) == 5) :
+    if (sys.argv[1]=="-win") :
+        window_selected=True
+        inputWindow=int(sys.argv[2])
+    elif (sys.argv[3]=="-win") :
+        window_selected=True
+        inputWindow=int(sys.argv[4])
+    if (sys.argv[1]=="-rot") :
+        if (sys.argv[2]=="portrait") :
+            portrait=True
+        else :
+            portrait=False
+    elif (sys.argv[3]=="-rot") :
+        if (sys.argv[4]=="portrait") :
+            portrait=True
+        else :
+            portrait=False
+
+else:
+    window_selected=False
+    portrait=False
 
 def winget():
     global delay_ms
@@ -101,6 +154,72 @@ def killPanel():
     if(hax == 1):
         os.system("killall mate-panel")
 
+def pixelsize():
+    global shell
+    global root
+    global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typea()
+    else:
+        print "No window has been selected! Select a window and then try again."
+
+def zoomin():
+    global shell
+    global root
+    global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typeplus()
+    else:
+        print "No window has been selected! Select a window and then try again."
+
+def zoomout():
+    global shell
+    global root
+    global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typeminus()
+    else:
+        print "No window has been selected! Select a window and then try again."
+
+def fitwidth():
+    global shell
+    global root
+    global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typew()
+    else:
+        print "No window has been selected! Select a window and then try again."
+        
+def bestfit():
+    global shell
+    global root
+    global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typeb()
+    else:
+        print "No window has been selected! Select a window and then try again."
+
+def rotate():
+    global shell
+    global root
+    global hax
+    global window_selected
+    if(window_selected==True):
+        xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
+        typer()
+    else:
+        print "No window has been selected! Select a window and then try again."
+        
 def fullscreen():
     global shell
     global full_screen
@@ -109,20 +228,6 @@ def fullscreen():
     global window_selected
     if(window_selected==True):
         xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
-        if(full_screen == 0):
-            # {
-            killPanel()
-            full_screen=1
-            root.wm_attributes("-fullscreen", 1)
-            # }
-
-        else:
-            if(hax == 1):
-            # {
-                os.system("mate-panel --replace 2>&1 1>/dev/null &")
-            # }
-            root.wm_attributes("-fullscreen",0)
-            full_screen=0
         typef()
     else:
         print "No window has been selected! Select a window and then try again."
@@ -136,31 +241,78 @@ def typeright():
     # 117 is the 'Page Down' key on a ANSI layout keyboard (U.S. layout 101-key IBM PC 'Enhanced Keyboard.')
     pressKey(117)
 
+def typeb():
+    pressKey(56)
+
+def typea():
+    pressKey(38)
+
+def typeplus(): #numpad plus has a unique keycode, unlike +/= key
+    pressKey(86)
+
+def typeminus():
+    pressKey(20)
+
 def typef():
     # 41 is the 'f' key on a ANSI layout keyboard (U.S. layout 101-key IBM PC 'Enhanced Keyboard.')
     pressKey(41)
 
+def typer():
+    # 'r' ansi
+    pressKey(27)
+
+def typew():
+    # 'w' ansi
+    pressKey(25)
+    
 def topleft():
     root.geometry('+0+0')
-
 def topright():
     root.geometry('-0+0')
-
 def btmleft():
-    root.geometry('+0-0')
-
+     root.geometry('+0-0')
 def btmright():
     root.geometry('-0-0')
 
+def callback():
+    return
+    
+def reload():
+    global inputWindow
+    global root
+    root.destroy()
+    root=Tk()  # reload
+    root["bg"]="#424242"
+    root.configure(background="#424242")
+    root.title("touchnav")
+    python = sys.executable
+#    os.execl(python, python, * sys.argv)
+# Pass
+    try:
+        str(inputWindow)
+    except NameError:
+        inputWindow=""
+    if(str(inputWindow) == ""):
+        if(portrait==False):
+            os.execl(python, python, sys.argv[0])
+        else:
+            os.execl(python, python, sys.argv[0], "-rot", "portrait")
+    else:
+        if(portrait==False):
+            os.execl(python, python, sys.argv[0], "-win", str(inputWindow))
+        else:
+            os.execl(python, python, sys.argv[0], "-win", str(inputWindow), "-rot", "portrait")
+            
 global xtest
 xtest=connection(xcffib.xtest.key)
-global inputWindow
+# global inputWindow
 
 
 from Tkinter import *
 global root
 root=Tk()  #holder
-
+root.configure(background='#424242')
+root.title("touchnav")
 root.resizable(width=FALSE, height=FALSE)
 root.resizable(0,0)
 
@@ -175,31 +327,86 @@ if(no_wm == True):
 root.wm_attributes("-type",['_NET_WM_WINDOW_TYPE_DOCK'])
 root.wm_attributes("-topmost", 1) # always on top, works for me (tm)
 
-buttonframe=Frame(root)
-buttonframe1=Frame(buttonframe)
-buttonframe2=Frame(buttonframe)
+buttonframe=Frame(root,bg="#424242")
+buttonframe1=Frame(buttonframe,bg="#424242")
+buttonframe2=Frame(buttonframe,bg="#424242")
+buttonframe3=Frame(buttonframe,bg="#424242")
 
-buttonframe.grid(row=0,column=1)
-buttonframe1.grid(row=0,column=0,rowspan=2)
-buttonframe2.grid(row=0,column=2,rowspan=2)
+if(portrait == False):
+    buttonframe.grid(row=0,column=1)
+    buttonframe1.grid(row=0,column=0,rowspan=2)
+    buttonframe2.grid(row=0,column=2,rowspan=2)
+    buttonframe3.grid(row=0,column=10,rowspan=2)
+else:
+    buttonframe.grid(row=1,column=0)
+    buttonframe1.grid(row=10,column=0,rowspan=2)
+    buttonframe2.grid(row=2,column=0,rowspan=2)
+    buttonframe3.grid(row=15,column=0,rowspan=2)
 
+
+if(portrait == False):
 #
 # 'move window' buttons
 # only needed if you have the window manager control of the window disabled.
-if(no_wm == True):
+    if(no_wm == True or corner_controls == True):
 # {
-    Button(buttonframe2,text="↖",height=1,width=1,justify=LEFT,font=(None,8),command=topleft).grid(row=0,column=3)
-    Button(buttonframe2,text="↗",height=1,width=1,justify=LEFT,font=(None,8),command=topright).grid(row=0,column=4)
-    Button(buttonframe2,text="↙",height=1,width=1,justify=LEFT,font=(None,8),command=btmleft).grid(row=1,column=3)
-    Button(buttonframe2,text="↘",height=1,width=1,justify=LEFT,font=(None,8),command=btmright).grid(row=1,column=4)
-#    Button(buttonframe2,text="X",height=3,width=1,justify=LEFT,font=(None,8),command=root.destroy).grid(row=0,column=5,rowspan=2)
-    Button(buttonframe2,text="❌",height=3,width=1,justify=LEFT,font=(None,8),command=root.destroy).grid(row=0,column=5,rowspan=2)
-# }
+        Button(buttonframe2,text="↖",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=topleft).grid(row=0,column=3)
+        Button(buttonframe2,text="↗",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=topright).grid(row=0,column=4)
+        Button(buttonframe2,text="↙",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=btmleft).grid(row=1,column=3)
+        Button(buttonframe2,text="↘",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=btmright).grid(row=1,column=4)
+        #    Button(buttonframe2,text="1:1",height=1,width=1,justify=LEFT,font=(None,8),command=pixelsize).grid(row=0,column=5,rowspan=1)
+        #    Button(buttonframe2,text="Fit",height=1,width=1,justify=LEFT,font=(None,8),command=bestfit).grid(row=1,column=5,rowspan=1)
+        #    Button(buttonframe2,text="+",height=1,width=1,justify=LEFT,font=(None,8),command=zoomin).grid(row=0,column=6,rowspan=1)
+        #    Button(buttonframe2,text="−",height=1,width=1,justify=LEFT,font=(None,8),command=zoomout).grid(row=1,column=6,rowspan=1)
+        Button(buttonframe3,text="❌",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=root.destroy).grid(row=0,column=7,rowspan=1)
+        Button(buttonframe3,text="⟳",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=reload).grid(row=1,column=7,rowspan=1)
+        # }
+        
+        if( extended_controls == True ):
+            Button(buttonframe2,text="1:1",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=pixelsize).grid(row=0,column=5,rowspan=1)
+            Button(buttonframe2,text="fit",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=bestfit).grid(row=1,column=5,rowspan=1)
+            Button(buttonframe2,text="r",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=rotate).grid(row=0,column=6,rowspan=1)
+            Button(buttonframe2,text="w",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fitwidth).grid(row=1,column=6,rowspan=1)
+            Button(buttonframe2,text="+",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomin).grid(row=0,column=7,columnspan=2)
+            Button(buttonframe2,text="−",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomout).grid(row=1,column=7,columnspan=2) 
+            
+            Button(buttonframe2,text="Select",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=3,justify=LEFT,font=(None,8),command=winget).grid(row=0,column=2)
+            Button(buttonframe2,text="FullScr",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=3,justify=LEFT,font=(None,8),command=fullscreen).grid(row=1,column=2)
+            Button(buttonframe1,text="<-------",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=3,width=3,justify=LEFT,font=(None,8),command=left).grid(row=0,column=0)
+            Button(buttonframe1,text="------->",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=3,width=3,justify=LEFT,font=(None,8),command=right).grid(row=0,column=1)
+            #Button(buttonframe1,text="<-----",height=1,width=2,justify=LEFT,font=(None,8),command=left).grid(row=0,column=0)
+            #Button(buttonframe1,text="----->",height=1,width=2,justify=LEFT,font=(None,8),command=right).grid(row=1,column=0)
+else:
+    if(no_wm == True or corner_controls == True):
+        Button(buttonframe2,text="↖",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=topleft).grid(row=3,column=0)
+        Button(buttonframe2,text="↗",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=topright).grid(row=3,column=1)
+        Button(buttonframe2,text="↙",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=btmleft).grid(row=4,column=0)
+        Button(buttonframe2,text="↘",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=btmright).grid(row=4,column=1)
+        #    Button(buttonframe2,text="1:1",height=1,width=1,justify=LEFT,font=(None,8),command=pixelsize).grid(row=5,column=0,rowspan=1)
+        #    Button(buttonframe2,text="Fit",height=1,width=1,justify=LEFT,font=(None,8),command=bestfit).grid(row=5,column=1,rowspan=1)
+        #    Button(buttonframe2,text="+",height=1,width=1,justify=LEFT,font=(None,8),command=zoomin).grid(row=6,column=0,rowspan=1)
+        #    Button(buttonframe2,text="−",height=1,width=1,justify=LEFT,font=(None,8),command=zoomout).grid(row=6,column=1,rowspan=1)
+        Button(buttonframe3,text="❌",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=root.destroy).grid(row=1,column=1,rowspan=1)
+        Button(buttonframe3,text="⟳",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=reload).grid(row=1,column=0,rowspan=1)
+        # }
+        
+        if( extended_controls == True ):
+            Button(buttonframe2,text="1:1",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=pixelsize).grid(row=5,column=0,rowspan=1)
+            Button(buttonframe2,text="fit",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=bestfit).grid(row=5,column=1,rowspan=1)
+#            Button(buttonframe2,text="fit",height=1,width=3,justify=LEFT,font=(None,8),command=bestfit).grid(row=5,column=1,rowspan=1)
+            Button(buttonframe2,text="r",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=rotate).grid(row=6,column=6,rowspan=1)
+            Button(buttonframe2,text="w",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fitwidth).grid(row=6,column=6,rowspan=1)
+            Button(buttonframe2,text="+",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomin).grid(row=7,column=0,rowspan=1)
+            Button(buttonframe2,text="−",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomout).grid(row=7,column=1,rowspan=1)
+            
+            Button(buttonframe3,text="Sel",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=winget).grid(row=0,column=0)
+            Button(buttonframe3,text="FSc",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fullscreen).grid(row=0,column=1)
+            Button(buttonframe1,text="<-----",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=3,width=3,justify=LEFT,font=(None,8),command=left).grid(row=0,column=0)
+            Button(buttonframe1,text="----->",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=3,width=3,justify=LEFT,font=(None,8),command=right).grid(row=1,column=0)
+            #Button(buttonframe1,text="<-----",height=1,width=2,justify=LEFT,font=(None,8),command=left).grid(row=0,column=0)
+            #Button(buttonframe1,text="----->",height=1,width=2,justify=LEFT,font=(None,8),command=right).grid(row=1,column=0)
 
-Button(buttonframe2,text="Select",height=1,width=3,justify=LEFT,font=(None,8),command=winget).grid(row=0,column=2)
-Button(buttonframe2,text="FScreen",height=1,width=3,justify=LEFT,font=(None,8),command=fullscreen).grid(row=1,column=2)
-Button(buttonframe1,text="<-------",height=3,width=3,justify=LEFT,font=(None,8),command=left).grid(row=0,column=0)
-Button(buttonframe1,text="------->",height=3,width=3,justify=LEFT,font=(None,8),command=right).grid(row=0,column=1)
+        
 
 def on_close():
     # connection is disconnected when the TK window closes.
@@ -207,6 +414,7 @@ def on_close():
     # in a terminal.
     connection.disconnect()
     root.destroy()
+
 
 root.mainloop()           #important for closing the root=Tk()
 
