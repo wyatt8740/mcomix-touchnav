@@ -12,6 +12,9 @@ import os
 import sys
 #================<CONFIG>================#
 
+filename="/home/wyatt/.touchnavid"
+
+
 # no_wm :
 #   when set to True, program does not have a window border and is moved by additional buttons.
 #   when set to False, program is draggable via your window manager.
@@ -40,6 +43,10 @@ corner_controls=True
 #   assembly language or Commodore BASIC than Python...
 global hax
 hax=0
+
+# Will the next 'wide' button press fit to height or fit to width?
+global wideset
+wideset=0
 
 # delay_ms :
 #   window selection delay, in milliseconds. After hitting the 'select' button you have this many
@@ -102,11 +109,29 @@ else:
     window_selected=False
     portrait=False
 
+if (not window_selected): # cli args override this methodology
+    if(not os.path.exists(filename)):
+        f=open(filename,'w')
+    else:
+        f=open(filename,'r')
+        f.seek(0)
+        teststr=f.readline()
+        if teststr=='' or teststr=='\n':
+           print("Could not read a window ID from "+filename+". Clearing file." )
+           f.close()
+           f=open(filename,'w')
+        else:
+           inputWindow=teststr
+           window_selected=True
+
+
 def winget():
     global delay_ms
     root.after(delay_ms,getwindow)
 
 def getwindow():
+    global f # persist file
+    global filename
     global inputWindow
     global window_selected
     connection.flush()
@@ -115,6 +140,11 @@ def getwindow():
     inputWindow = windowCookie.focus
     window_selected=True
     print inputWindow
+    f.close() # erase file
+    f=open(filename,'w')
+    f.write(str(inputWindow)+'\n')
+    f.close()
+    f=open(filename,'r')
 
 def pressKey(keyCode):
     XTEST_EVENTS = {
@@ -192,9 +222,15 @@ def fitwidth():
     global root
     global hax
     global window_selected
+    global wideset
     if(window_selected==True):
         xtest.conn.core.SetInputFocus(xcffib.xproto.InputFocus.Parent, inputWindow, xcffib.CurrentTime)
-        typew()
+        if(wideset==0):
+            typew()
+            wideset=1
+        else:
+            typeh()
+            wideset=0
     else:
         print "No window has been selected! Select a window and then try again."
         
@@ -264,7 +300,11 @@ def typer():
 def typew():
     # 'w' ansi
     pressKey(25)
-    
+
+def typeh():
+    # 'h' ansi
+    pressKey(43)
+
 def topleft():
     root.geometry('+0+0')
 def topright():
@@ -366,7 +406,7 @@ if(portrait == False):
             Button(buttonframe2,text="1:1",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=pixelsize).grid(row=0,column=5,rowspan=1)
             Button(buttonframe2,text="fit",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=bestfit).grid(row=1,column=5,rowspan=1)
             Button(buttonframe2,text="r",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=rotate).grid(row=0,column=6,rowspan=1)
-            Button(buttonframe2,text="w",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fitwidth).grid(row=1,column=6,rowspan=1)
+            Button(buttonframe2,text="w/h",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fitwidth).grid(row=1,column=6,rowspan=1)
             Button(buttonframe2,text="+",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomin).grid(row=0,column=7,columnspan=2)
             Button(buttonframe2,text="−",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomout).grid(row=1,column=7,columnspan=2) 
             
@@ -395,7 +435,7 @@ else:
             Button(buttonframe2,text="fit",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=bestfit).grid(row=5,column=1,rowspan=1)
 #            Button(buttonframe2,text="fit",height=1,width=3,justify=LEFT,font=(None,8),command=bestfit).grid(row=5,column=1,rowspan=1)
             Button(buttonframe2,text="r",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=rotate).grid(row=6,column=6,rowspan=1)
-            Button(buttonframe2,text="w",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fitwidth).grid(row=6,column=6,rowspan=1)
+            Button(buttonframe2,text="w/h",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=fitwidth).grid(row=6,column=6,rowspan=1)
             Button(buttonframe2,text="+",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomin).grid(row=7,column=0,rowspan=1)
             Button(buttonframe2,text="−",relief="flat",highlightbackground="#282828",bg="#424242",activebackground="#424242",fg="#848484",activeforeground="#848484",height=1,width=1,justify=LEFT,font=(None,8),command=zoomout).grid(row=7,column=1,rowspan=1)
             
@@ -412,6 +452,12 @@ def on_close():
     # connection is disconnected when the TK window closes.
     # the program (and thus connection) can also be aborted via ctrl+\ (SIGQUIT)
     # in a terminal.
+    # inputWindow saved to file for next run (useful for restarts)
+    global f
+    f.close() # close file descriptor for persist file
+    if window_selected: # inputWindow is set
+        persistfile.close()
+    
     connection.disconnect()
     root.destroy()
 
